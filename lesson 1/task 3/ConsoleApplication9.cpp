@@ -5,7 +5,8 @@
 #include <string>
 #include <locale>
 
-struct Address {
+class Address {
+public:
     std::string city;
     std::string street;
     std::string house;
