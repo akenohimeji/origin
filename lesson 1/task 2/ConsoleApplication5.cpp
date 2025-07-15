@@ -2,7 +2,7 @@
 #include <locale>
 
 class Calculator {
-public:
+private:
     double num1;
     double num2;
 
@@ -10,7 +10,7 @@ public:
     double add() {
         return num1 + num2;
     }
-
+ public:
     double multiply() {
         return num1 * num2;
     }
