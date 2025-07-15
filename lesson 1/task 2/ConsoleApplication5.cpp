@@ -5,12 +5,12 @@ class Calculator {
 private:
     double num1;
     double num2;
-
+public:
     // Методы для арифметических операций
     double add() {
         return num1 + num2;
     }
- public:
+ 
     double multiply() {
         return num1 * num2;
     }
