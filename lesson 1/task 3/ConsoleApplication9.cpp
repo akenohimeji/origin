@@ -7,61 +7,92 @@
 
 class Address {
 public:
+    Address(const std::string& city, const std::string& street, const std::string& house, const std::string& apartment)
+        : city(city), street(street), house(house), apartment(apartment) {
+    }
+
+    std::string getCity() const { return city; }
+    std::string getStreet() const { return street; }
+    std::string getHouse() const { return house; }
+    std::string getApartment() const { return apartment; }
+
+private:
     std::string city;
     std::string street;
     std::string house;
     std::string apartment;
 };
 
-int main() {
-    // Устанавливаем локаль для корректной работы с русским языком
-    std::locale::global(std::locale(""));
+class AddressManager {
+public:
+    void readAddresses(const std::string& filename);
+    void sortAddresses();
+    void writeAddresses(const std::string& filename) const;
 
-    std::ifstream inputFile("in.txt");
-    std::ofstream outputFile("out.txt");
+private:
+    std::vector<Address> addresses;
+};
 
+void AddressManager::readAddresses(const std::string& filename) {
+    std::ifstream inputFile(filename);
     if (!inputFile.is_open()) {
-        std::cerr << "Ошибка: не удалось открыть файл in.txt" << std::endl;
-        return 1;
-    }
-
-    if (!outputFile.is_open()) {
-        std::cerr << "Ошибка: не удалось создать файл out.txt" << std::endl;
-        return 1;
+        throw std::runtime_error("Ошибка: не удалось открыть файл " + filename);
     }
 
     int n;
     inputFile >> n;
     inputFile.ignore(); // Игнорируем символ новой строки после числа
 
-    std::vector<Address> addresses(n);
-
-    // Читаем адреса из файла
     for (int i = 0; i < n; i++) {
-        std::getline(inputFile, addresses[i].city);
-        std::getline(inputFile, addresses[i].street);
-        std::getline(inputFile, addresses[i].house);
-        std::getline(inputFile, addresses[i].apartment);
-    }
-
-    // Сортируем адреса по названию города в алфавитном порядке
-    std::sort(addresses.begin(), addresses.end(), [](const Address& a, const Address& b) {
-        return a.city < b.city;
-        });
-
-    // Записываем количество адресов в выходной файл
-    outputFile << n << std::endl;
-
-    // Записываем отсортированные адреса в новом формате
-    for (const auto& addr : addresses) {
-        outputFile << addr.city << ", " << addr.street << ", "
-            << addr.house << ", " << addr.apartment << std::endl;
+        std::string city, street, house, apartment;
+        std::getline(inputFile, city);
+        std::getline(inputFile, street);
+        std::getline(inputFile, house);
+        std::getline(inputFile, apartment);
+        addresses.emplace_back(city, street, house, apartment);
     }
 
     inputFile.close();
-    outputFile.close();
+}
 
-    std::cout << "Программа успешно выполнена. Результат записан в файл out.txt" << std::endl;
+void AddressManager::sortAddresses() {
+    std::sort(addresses.begin(), addresses.end(), [](const Address& a, const Address& b) {
+        return a.getCity() < b.getCity(); // Сортируем по названию города
+        });
+}
+
+void AddressManager::writeAddresses(const std::string& filename) const {
+    std::ofstream outputFile(filename);
+    if (!outputFile.is_open()) {
+        throw std::runtime_error("Ошибка: не удалось создать файл " + filename);
+    }
+
+    outputFile << addresses.size() << std::endl; // Записываем количество адресов
+
+    for (const auto& addr : addresses) {
+        outputFile << addr.getCity() << ", " << addr.getStreet() << ", "
+            << addr.getHouse() << ", " << addr.getApartment() << std::endl;
+    }
+
+    outputFile.close();
+}
+
+int main() {
+    // Устанавливаем локаль для корректной работы с русским языком
+    std::locale::global(std::locale(""));
+
+    try {
+        AddressManager manager;
+        manager.readAddresses("in.txt");
+        manager.sortAddresses();
+        manager.writeAddresses("out.txt");
+
+        std::cout << "Программа успешно выполнена. Результат записан в файл out.txt" << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 }
