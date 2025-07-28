@@ -1,45 +1,135 @@
 ﻿#include <iostream>
+#include <memory>
 #include <string>
-#include <windows.h>
+#include <locale>
 
-using namespace std;
+// Базовый класс для фигур
+class Shape {
+public:
+    virtual void print_info() const = 0; // Чисто виртуальная функция для вывода информации
+    virtual ~Shape() = default; // Виртуальный деструктор
+};
 
-void printTriangle(const string& name, int a, int b, int c, int A, int B, int C) {
-    cout << name << ":" << endl;
-    cout << "Стороны: a=" << a << " b=" << b << " c=" << c << endl;
-    cout << "Углы: A=" << A << " B=" << B << " C=" << C << endl;
-}
+// Класс для треугольников
+class Triangle : public Shape {
+protected:
+    double a, b, c; // Стороны
+    double A, B, C; // Углы
 
-void printQuadrilateral(const string& name, int a, int b, int c, int d, int A, int B, int C, int D) {
-    cout << name << ":" << endl;
-    cout << "Стороны: a=" << a << " b=" << b << " c=" << c << " d=" << d << endl;
-    cout << "Углы: A=" << A << " B=" << B << " C=" << C << " D=" << D << endl;
+public:
+    Triangle(double a, double b, double c, double A, double B, double C)
+        : a(a), b(b), c(c), A(A), B(B), C(C) {
+    }
+
+    void print_info() const override {
+        std::cout << "Треугольник:" << std::endl
+            << "Стороны: a = " << a << ", b = " << b << ", c = " << c << std::endl
+            << "Углы: A = " << A << ", B = " << B << ", C = " << C << std::endl;
+    }
+};
+
+// Класс для прямоугольных треугольников
+class RightTriangle : public Triangle {
+public:
+    RightTriangle(double a, double b)
+        : Triangle(a, b, std::sqrt(a* a + b * b), 90.0, std::atan(b / a) * 180.0 / M_PI, std::atan(a / b) * 180.0 / M_PI) {
+    }
+};
+
+// Класс для равнобедренных треугольников
+class IsoscelesTriangle : public Triangle {
+public:
+    IsoscelesTriangle(double a, double b, double A)
+        : Triangle(a, b, a, A, (180.0 - A) / 2.0, (180.0 - A) / 2.0) {
+    }
+};
+
+// Класс для равносторонних треугольников
+class EquilateralTriangle : public Triangle {
+public:
+    EquilateralTriangle(double side)
+        : Triangle(side, side, side, 60, 60, 60) {
+    }
+};
+
+// Класс для четырехугольников
+class Quadrilateral : public Shape {
+protected:
+    double a, b, c, d; // Стороны
+    double A, B, C, D; // Углы
+
+public:
+    Quadrilateral(double a, double b, double c, double d, double A, double B, double C, double D)
+        : a(a), b(b), c(c), d(d), A(A), B(B), C(C), D(D) {
+    }
+
+    void print_info() const override {
+        std::cout << "Четырехугольник:" << std::endl
+            << "Стороны: a = " << a << ", b = " << b << ", c = " << c << ", d = " << d << std::endl
+            << "Углы: A = " << A << ", B = " << B << ", C = " << C << ", D = " << D << std::endl;
+    }
+};
+
+// Класс для квадратов
+class Square : public Quadrilateral {
+public:
+    Square(double side)
+        : Quadrilateral(side, side, side, side, 90, 90, 90, 90) {
+    }
+};
+
+// Класс для прямоугольников
+class Rectangle : public Quadrilateral {
+public:
+    Rectangle(double width, double height)
+        : Quadrilateral(width, height, width, height, 90, 90, 90, 90) {
+    }
+};
+
+// Класс для параллелограммов
+class Parallelogram : public Quadrilateral {
+public:
+    Parallelogram(double a, double b, double A, double B)
+        : Quadrilateral(a, b, a, b, A, B, A, B) {
+    }
+};
+
+// Класс для ромбов
+class Rhombus : public Quadrilateral {
+public:
+    Rhombus(double side, double A, double B)
+        : Quadrilateral(side, side, side, side, A, B, A, B) {
+    }
+};
+
+// Функция для вывода информации о фигурах
+void print_shape_info(const Shape* shape) {
+    shape->print_info();
 }
 
 int main() {
-    // Установка кодировки для корректного отображения русских символов
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
+    // Устанавливаем локаль для корректной работы с русским языком
+    std::locale::global(std::locale(""));
 
-    // Треугольники
-    printTriangle("Треугольник", 10, 20, 30, 50, 60, 70);
+    // Создаем экземпляры фигур
+    RightTriangle rightTriangle(3, 4);
+    IsoscelesTriangle isoscelesTriangle(5, 5, 40);
+    EquilateralTriangle equilateralTriangle(6);
 
-    printTriangle("Прямоугольный треугольник", 10, 20, 30, 50, 60, 90);
+    Rectangle rectangle(4, 2);
+    Square square(3);
+    Parallelogram parallelogram(5, 3, 60, 120);
+    Rhombus rhombus(4, 60, 120);
 
-    printTriangle("Равнобедренный треугольник", 10, 20, 10, 50, 60, 50);
+    // Выводим информацию о фигурах
+    print_shape_info(&rightTriangle);
+    print_shape_info(&isoscelesTriangle);
+    print_shape_info(&equilateralTriangle);
 
-    printTriangle("Равносторонний треугольник", 30, 30, 30, 60, 60, 60);
-
-    // Четырёхугольники
-    printQuadrilateral("Четырёхугольник", 10, 20, 30, 40, 50, 60, 70, 80);
-
-    printQuadrilateral("Прямоугольник", 10, 20, 10, 20, 90, 90, 90, 90);
-
-    printQuadrilateral("Квадрат", 20, 20, 20, 20, 90, 90, 90, 90);
-
-    printQuadrilateral("Параллелограмм", 20, 30, 20, 30, 30, 40, 30, 40);
-
-    printQuadrilateral("Ромб", 30, 30, 30, 30, 30, 40, 30, 40);
+    print_shape_info(&rectangle);
+    print_shape_info(&square);
+    print_shape_info(&parallelogram);
+    print_shape_info(&rhombus);
 
     return 0;
 }
